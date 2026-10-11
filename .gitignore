@@ -141,3 +141,10 @@ vite.config.ts.timestamp-*
 build/
 */.DS_Store
 .vercel/
+# SQLite database (sign-in accounts and scores)
+data/
+
+.vercel
+
+# GitHub Pages build (/deploy_github_page)
+build-gh-pages/

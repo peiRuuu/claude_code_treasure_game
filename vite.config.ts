@@ -1,10 +1,25 @@
 
-  import { defineConfig } from 'vite';
+  import { defineConfig, type Plugin } from 'vite';
   import react from '@vitejs/plugin-react-swc';
   import path from 'path';
+  import { createApiHandler } from './server/api.mjs';
+
+  // Serves the SQLite sign-in / score API (/api/*) from both `vite` (dev) and `vite preview`.
+  function sqliteApi(): Plugin {
+    const dbPath = path.resolve(__dirname, 'data/treasure.db');
+    return {
+      name: 'sqlite-api',
+      configureServer(server) {
+        server.middlewares.use(createApiHandler({ dbPath }));
+      },
+      configurePreviewServer(server) {
+        server.middlewares.use(createApiHandler({ dbPath }));
+      },
+    };
+  }
 
   export default defineConfig({
-    plugins: [react()],
+    plugins: [react(), sqliteApi()],
     resolve: {
       extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
       alias: {
@@ -56,5 +71,7 @@
     server: {
       port: 3000,
       open: true,
+      // The SQLite file lives in the project; don't let writes to it trigger reloads.
+      watch: { ignored: ['**/data/**'] },
     },
   });
