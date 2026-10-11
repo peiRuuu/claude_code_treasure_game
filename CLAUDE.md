@@ -16,7 +16,15 @@ npm run build   # production build to build/ (not dist/)
 
 Deploys are custom commands in `.claude/commands/`: `/deploy_vercel` (`vercel.json` sets `outputDirectory: build`) and `/deploy_github_page` (builds with `npm run build -- --base=/<repo>/ --outDir build-gh-pages` and publishes with `gh-pages`). Keep `base` out of `vite.config.ts` — dev and Vercel serve from `/`. Both deployed sites are static, so only guest mode works there. `origin` should be the user's repo and `upstream` the course repo.
 
-There is no test runner, linter, or `tsconfig.json`. Vite (SWC) strips types without type-checking, so type errors do not fail the build.
+```bash
+npm test                         # Vitest, all tests in tests/
+npm run coverage                 # same, with V8 coverage; fails below 95% statements/branches/functions/lines
+npx vitest run tests/App.test.tsx   # a single file
+```
+
+Tests live in `tests/` (mirroring `src/` and `server/`), run in jsdom with Testing Library; `tests/setup.ts` adds jest-dom matchers and stubs browser APIs jsdom lacks (ResizeObserver, matchMedia, pointer capture, `elementFromPoint`). `vitest.config.ts` reuses the Vite aliases but not the `sqlite-api` plugin; server tests (`// @vitest-environment node`) use a temp SQLite file. Coverage counts every file in `src/` (including the generated `ui/` library) and `server/` — don't exclude files to meet the threshold.
+
+There is no linter or `tsconfig.json`. Vite (SWC) strips types without type-checking, so type errors do not fail the build or the tests.
 
 ## Architecture
 
